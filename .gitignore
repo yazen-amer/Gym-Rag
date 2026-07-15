@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.uv/
+
+# Env / secrets
+.env
+.env.local
+
+# Vector store data & ingested papers (keep the dirs, not the contents)
+backend/data/chroma/*
+!backend/data/chroma/.gitkeep
+backend/data/papers/*
+!backend/data/papers/.gitkeep
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.log
