@@ -4,15 +4,4 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: {
-    port: 5173,
-    // Proxy API calls to the FastAPI backend during development so the browser
-    // talks to a single origin (and SSE streams work without CORS friction).
-    proxy: {
-      "/api": {
-        target: "http://localhost:8000",
-        changeOrigin: true,
-      },
-    },
-  },
 });

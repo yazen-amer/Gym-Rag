@@ -20,6 +20,7 @@ backend/data/papers/*
 node_modules/
 dist/
 .vite/
+*.tsbuildinfo
 
 # Editors / OS
 .DS_Store

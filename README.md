@@ -1,72 +1,30 @@
 # GymRAG
 
-A RAG-based gym & exercise-science chatbot. Drop strength-and-conditioning
-research papers into the backend, and the app answers training / nutrition /
-recovery questions grounded in those papers — with a ChatGPT-style streaming UI
-and inline citations.
+Scaffolding for a RAG-based gym & exercise-science chatbot: drop
+strength-and-conditioning research papers into the backend and chat with an
+assistant that answers training / nutrition / recovery questions grounded in
+those papers, with streaming responses and inline citations.
 
-## Architecture
+**This repo is intentionally just scaffolding.** The project itself is a
+learning exercise — the full build guide lives in [`plan.md`](plan.md).
+
+## Layout
 
 ```
-                 ┌─────────────────────────────┐
-   Browser  ───▶ │  Frontend (Vite + React)    │
-   :5173         │  ChatGPT-style streaming UI │
-                 └──────────────┬──────────────┘
-                                │  POST /api/chat (SSE)
-                                ▼
-                 ┌─────────────────────────────┐
-                 │  Backend (FastAPI + uv)     │
-                 │                             │
-   PDFs ──ingest▶│  1. Chroma vector search    │  Cohere embeddings
-                 │  2. Cohere rerank           │  Cohere Rerank
-                 │  3. Claude answer (stream)  │  Anthropic
-                 └─────────────────────────────┘
+backend/    Python (uv) — will become a FastAPI RAG service
+frontend/   Vite + React + TypeScript + Tailwind v4 — will become the chat UI
+plan.md     The step-by-step implementation guide. Start here.
 ```
 
-**Retrieval flow:** a question is embedded and matched against chunked papers in
-Chroma (top `RETRIEVAL_K`), the candidates are reranked by Cohere Rerank down to
-`RERANK_TOP_N`, and those excerpts are passed to Claude, which streams a grounded
-answer with inline `[n]` citations.
-
-## Tech
-
-| Layer     | Choices                                                             |
-| --------- | ------------------------------------------------------------------- |
-| Backend   | uv, Python 3.11, FastAPI, LangChain, Chroma, Cohere, Anthropic       |
-| Frontend  | Vite, React, TypeScript, Tailwind CSS v4                             |
-| Streaming | Server-Sent Events (`sources` → `token`… → `done`)                   |
-
-## Quick start
-
-**1. Backend**
+## Quick sanity check
 
 ```bash
+# Backend
 cd backend
-uv sync
-cp .env.example .env          # add ANTHROPIC_API_KEY and COHERE_API_KEY
-# add some PDFs to data/papers/, then:
-uv run python -m scripts.ingest_papers
-uv run uvicorn app.main:app --reload --port 8000
-```
+uv run main.py
 
-**2. Frontend** (in a second terminal)
-
-```bash
+# Frontend (second terminal)
 cd frontend
 npm install
-npm run dev                   # http://localhost:5173
+npm run dev        # http://localhost:5173
 ```
-
-See [`backend/README.md`](backend/README.md) and
-[`frontend/README.md`](frontend/README.md) for details.
-
-## What's scaffolded vs. next steps
-
-This is working scaffolding — the full retrieve → rerank → generate loop and a
-streaming chat UI are wired end to end. Natural next steps:
-
-- **Persistence:** conversations are in-memory (per browser session) only.
-- **Auth / rate limiting** before any public deployment.
-- **Citation linking:** map `[n]` markers in the answer to the sources panel.
-- **Ingestion UX:** upload PDFs from the UI instead of the CLI.
-- **Eval harness:** measure retrieval quality as the paper corpus grows.
