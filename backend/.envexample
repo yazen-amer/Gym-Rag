@@ -1,0 +1,29 @@
+# Gemini
+GEMINI_API_KEY=
+
+# Gemini model used for chat responses
+CHAT_MODEL=gemini-2.5-flash
+
+# Cohere
+COHERE_API_KEY=
+
+# Embedding & reranking models
+EMBED_MODEL=embed-english-v3.0
+RERANK_MODEL=rerank-english-v3.0
+
+# Retrieval settings
+RETRIEVAL_K=20
+RERANK_TOP_N=5
+USE_RERANK=true
+
+# Data directories
+PAPERS_DIR=data/papers
+CHROMA_DIR=data/chroma
+CHROMA_COLLECTION=gym_papers
+
+# Text chunking
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=150
+
+# Frontend allowed to access the API
+CORS_ORIGINS=http://localhost:5173
