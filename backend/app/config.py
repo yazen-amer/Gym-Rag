@@ -13,7 +13,7 @@ class Settings(BaseSettings):
         rerank_model: str = Field(default="rerank-english-v3.0")
         retrieval_k: int = Field(default=20)
         rerank_top_n: int = Field(default=5)
-        use_rerank: bool = Field(default=True)
+        use_rerank: bool = Field(default=False)
         papers_dir: Path = Field(default=backend_dir / "data" / "papers")
         chroma_dir: Path = Field(default=backend_dir / "data" / "chroma")
         chroma_collection: str = Field(default="gym_papers")

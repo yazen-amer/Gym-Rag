@@ -2,6 +2,7 @@ from app.config import get_settings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from app.rag.vectorstore import get_vectorstore
+import time
 
 settings = get_settings()
 
@@ -31,5 +32,6 @@ def ingest_papers() -> tuple[int, int]:
        all_chunks = text_splitter.split_documents(docs)
        chunks_added += len(all_chunks)
        vector_store.add_documents(all_chunks)
+       time.sleep(20)
 
     return files_processed, chunks_added

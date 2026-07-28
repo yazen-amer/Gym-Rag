@@ -1,0 +1,109 @@
+[
+  {
+    "question": "How much protein should I eat each day to maximize muscle growth?",
+    "expected_sources": ["ProteinTarget"]
+  },
+  {
+    "question": "How much protein should I eat after lifting weights?",
+    "expected_sources": ["ProteinTarget"]
+  },
+  {
+    "question": "Is eating 60 grams of protein in one meal a waste?",
+    "expected_sources": ["ProteinTarget"]
+  },
+  {
+    "question": "Does leucine matter for building muscle?",
+    "expected_sources": ["ProteinTarget"]
+  },
+
+  {
+    "question": "Does doing more weekly sets lead to more muscle growth?",
+    "expected_sources": ["WeeklyVolume"]
+  },
+  {
+    "question": "How many weekly sets should I do for each muscle?",
+    "expected_sources": ["WeeklyVolume"]
+  },
+  {
+    "question": "Does increasing training frequency improve strength?",
+    "expected_sources": ["WeeklyVolume"]
+  },
+  {
+    "question": "Is there a point where adding more volume stops helping?",
+    "expected_sources": ["WeeklyVolume"]
+  },
+
+  {
+    "question": "How long should I rest between sets for muscle growth?",
+    "expected_sources": ["RestTimes"]
+  },
+  {
+    "question": "Are 30-second rests enough for hypertrophy?",
+    "expected_sources": ["RestTimes"]
+  },
+  {
+    "question": "Do longer rest periods build more muscle?",
+    "expected_sources": ["RestTimes"]
+  },
+  {
+    "question": "Should I rest longer if my performance drops every set?",
+    "expected_sources": ["RestTimes", "WeeklyVolume"]
+  },
+
+  {
+    "question": "Are compound exercises better than isolation exercises?",
+    "expected_sources": ["CompoundVersusIsolation"]
+  },
+  {
+    "question": "Should I bench press or do dumbbell flyes for chest growth?",
+    "expected_sources": ["CompoundVersusIsolation"]
+  },
+  {
+    "question": "Which exercise activates the chest muscles more: bench press or flyes?",
+    "expected_sources": ["CompoundVersusIsolation"]
+  },
+
+  {
+    "question": "How does one bad night of sleep affect gym performance?",
+    "expected_sources": ["SleepDeprivationEffects"]
+  },
+  {
+    "question": "Is lifting in the morning better than the evening after poor sleep?",
+    "expected_sources": ["SleepDeprivationEffects"]
+  },
+  {
+    "question": "Does sleep deprivation reduce strength?",
+    "expected_sources": ["SleepDeprivationEffects"]
+  },
+
+  {
+    "question": "Can exercise reduce some of the negative effects of sleep restriction?",
+    "expected_sources": ["SleepDeprivationEffects2"]
+  },
+  {
+    "question": "What happens inside muscle after several nights of poor sleep?",
+    "expected_sources": ["SleepDeprivationEffects2"]
+  },
+  {
+    "question": "Does HIIT help offset the effects of sleep restriction?",
+    "expected_sources": ["SleepDeprivationEffects2"]
+  },
+
+  {
+    "question": "Is muscle growth actually responsible for getting stronger?",
+    "expected_sources": ["StrengthCorrelationAndVolume"]
+  },
+  {
+    "question": "Are strength gains mostly explained by neural adaptations or muscle growth?",
+    "expected_sources": ["StrengthCorrelationAndVolume"]
+  },
+  {
+    "question": "How strongly is hypertrophy related to strength gains?",
+    "expected_sources": ["StrengthCorrelationAndVolume"]
+  },
+
+  {
+    "question": "Does higher volume lead to more muscle growth?",
+    "expected_sources": ["WeeklyVolume"]
+  }
+]
