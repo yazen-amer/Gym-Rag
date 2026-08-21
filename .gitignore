@@ -13,8 +13,6 @@ venv/
 # Vector store data & ingested papers (keep the dirs, not the contents)
 backend/data/chroma/*
 !backend/data/chroma/.gitkeep
-backend/data/papers/*
-!backend/data/papers/.gitkeep
 
 # Node / frontend
 node_modules/
