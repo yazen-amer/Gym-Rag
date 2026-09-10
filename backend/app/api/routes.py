@@ -1,4 +1,8 @@
 import json
+import shutil
+from pathlib import Path
+from fastapi import UploadFile, File, HTTPException
+from app.rag.ingest import ingest_single_pdf  # add alongside existing ingest_papers import
 from fastapi import APIRouter
 from app.config import get_settings
 from fastapi.responses import StreamingResponse
@@ -37,4 +41,22 @@ async def ingest():
         files_processed=files,
         chunks_added=chunks,
         collection=get_settings().chroma_collection,
+    )
+
+@router.post("/upload", response_model=IngestResponse)
+async def upload_pdf(file: UploadFile = File(...)):
+    if Path(file.filename).suffix.lower() not in ALLOWED_EXT:
+        raise HTTPException(400, "Only PDF files are supported")
+
+    settings.papers_dir.mkdir(parents=True, exist_ok=True)
+    dest = settings.papers_dir / file.filename
+
+    with dest.open("wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    chunks = ingest_single_pdf(dest)
+    return IngestResponse(
+        files_processed=1,
+        chunks_added=chunks,
+        collection=settings.chroma_collection,
     )
