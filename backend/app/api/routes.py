@@ -14,6 +14,7 @@ from app.rag.generate import stream_answer
 
 router = APIRouter()
 settings = get_settings()
+ALLOWED_EXT = {".pdf"}
 
 def _sse(event, data): return f"event: {event}\ndata: {json.dumps(data)}\n\n"
 
