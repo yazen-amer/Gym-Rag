@@ -15,9 +15,6 @@ I built a 25-query evaluation harness to actually measure whether retrieval was 
 | Vector search only | 88% |
 | Vector search + reranking | 96% |
 
-## Screenshots
-[query + cited response example]
-
 ## Stack
 Python, FastAPI, ChromaDB (vector store), Cohere (reranking), Gemini (generation), LangChain
 
