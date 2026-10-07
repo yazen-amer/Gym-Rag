@@ -16,7 +16,7 @@ export function useChat() {
       setError(null);
 
       // Build history from the messages that exist *before* this turn.
-      const history: ChatTurn[] = messages.map((m) => ({
+      const history: ChatTurn[] = messages.filter((m) => m.content.trim()).map((m) => ({
         role: m.role,
         content: m.content,
       }));
@@ -35,6 +35,7 @@ export function useChat() {
 
       await streamChat(trimmed, history, controller.signal, {
         onSources: (sources: Source[]) => {
+          if (abortRef.current !== controller) return;
           setMessages((prev) => {
             const next = [...prev];
             const last = next[next.length - 1];
@@ -43,6 +44,7 @@ export function useChat() {
           });
         },
         onToken: (token: string) => {
+          if (abortRef.current !== controller) return;
           // Functional update + immutable edit of the last element only —
           // closing over `messages` directly here would stream into a
           // stale snapshot and drop tokens.
@@ -54,10 +56,12 @@ export function useChat() {
           });
         },
         onDone: () => {
+          if (abortRef.current !== controller) return;
           setIsStreaming(false);
           abortRef.current = null;
         },
         onError: (err: Error) => {
+          if (abortRef.current !== controller) return;
           setIsStreaming(false);
           abortRef.current = null;
           setError(err.message || "Something went wrong talking to the backend.");

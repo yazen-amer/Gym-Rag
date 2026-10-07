@@ -1,11 +1,5 @@
-# GymRAG — Frontend
+# GymRAG frontend
 
-Vite + React + TypeScript + Tailwind CSS v4 scaffolding.
+Run `npm ci`, then `npm run dev` for the local Vite proxy. Run `npm test` and `npm run build` for verification.
 
-This is a bare starting point — see [`../plan.md`](../plan.md) for what to build here.
-
-```bash
-cd frontend
-npm install
-npm run dev    # http://localhost:5173
-```
+Production requires `VITE_API_URL=https://your-backend.example.com/api` at build time. Set the backend's `CORS_ORIGINS` to this frontend's origin. See [the project README](../README.md) for the full setup.

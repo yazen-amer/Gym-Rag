@@ -1,10 +1,5 @@
-# GymRAG — Backend
+# GymRAG backend
 
-Python backend scaffolding, managed with [uv](https://docs.astral.sh/uv/).
+See [the project README](../README.md) for setup, ingestion, deployment and tests.
 
-This is a bare starting point — see [`../plan.md`](../plan.md) for what to build here.
-
-```bash
-cd backend
-uv run main.py    # sanity check: prints a hello message
-```
+Run from this directory with `uv run uvicorn app.main:app --port 8000`. The backend loads `.env` from this directory regardless of the launch working directory. Environment variables override `.env` values. Relative data paths in `.env` still resolve against the process working directory, so use absolute paths on hosted persistent volumes.

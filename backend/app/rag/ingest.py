@@ -3,6 +3,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from app.rag.vectorstore import get_vectorstore
 import time
+import hashlib
 
 settings = get_settings()
 
@@ -31,7 +32,13 @@ def ingest_papers() -> tuple[int, int]:
        )
        all_chunks = text_splitter.split_documents(docs)
        chunks_added += len(all_chunks)
-       vector_store.add_documents(all_chunks)
+       ids = [
+           hashlib.sha256(
+               f"{pdf.name}:{chunk.metadata['page']}:{chunk.metadata.get('start_index', 0)}:{chunk.page_content}".encode()
+           ).hexdigest()
+           for chunk in all_chunks
+       ]
+       vector_store.add_documents(all_chunks, ids=ids)
        time.sleep(20)
 
     return files_processed, chunks_added

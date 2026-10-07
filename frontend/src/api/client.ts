@@ -21,7 +21,11 @@ export async function streamChat(
   callbacks: ChatCallbacks
 ): Promise<void> {
   try {
-    const res = await fetch("/api/chat", {
+    if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
+      throw new Error("Set VITE_API_URL to the deployed backend URL (including /api), then rebuild the frontend.");
+    }
+    const apiBase = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
+    const res = await fetch(`${apiBase}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message, history }),
@@ -29,33 +33,46 @@ export async function streamChat(
     });
 
     if (!res.ok || !res.body) {
-      throw new Error(`Chat request failed: ${res.status} ${res.statusText}`);
+      let detail = "";
+      try {
+        const body = await res.json();
+        detail = typeof body.detail === "string" ? body.detail : "";
+      } catch { /* Proxies can return HTML or an empty body. */ }
+      throw new Error(detail || `Chat request failed (${res.status}). Check the backend URL and availability.`);
     }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
+    let completed = false;
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+    try {
+      while (!completed) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      // { stream: true } matters: without it, a multi-byte UTF-8 character
-      // split across two network chunks gets decoded into garbage.
-      buffer += decoder.decode(value, { stream: true });
+        // { stream: true } matters: without it, a multi-byte UTF-8 character
+        // split across two network chunks gets decoded into garbage.
+        buffer += decoder.decode(value, { stream: true });
+        buffer = buffer.replace(/\r\n/g, "\n");
 
-      // Frames are separated by a blank line ("\n\n"). A single network
-      // chunk can contain a partial frame, one frame, or several frames,
-      // so we repeatedly peel complete frames off the front of the buffer.
-      let frameEnd: number;
-      while ((frameEnd = buffer.indexOf("\n\n")) !== -1) {
-        const frame = buffer.slice(0, frameEnd);
-        buffer = buffer.slice(frameEnd + 2);
-        dispatchFrame(frame, callbacks);
+        // Frames are separated by a blank line ("\n\n"). A single network
+        // chunk can contain a partial frame, one frame, or several frames,
+        // so we repeatedly peel complete frames off the front of the buffer.
+        let frameEnd: number;
+        while ((frameEnd = buffer.indexOf("\n\n")) !== -1) {
+          const frame = buffer.slice(0, frameEnd);
+          buffer = buffer.slice(frameEnd + 2);
+          completed = dispatchFrame(frame, callbacks) || completed;
+        }
       }
-    }
 
-    callbacks.onDone();
+      if (!completed) throw new Error("The response ended before completion. Please try again.");
+      callbacks.onDone();
+    } finally {
+      await reader.cancel().catch(() => {});
+      reader.releaseLock();
+    }
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
       // Deliberate cancellation (Stop button), not a failure.
@@ -65,7 +82,7 @@ export async function streamChat(
   }
 }
 
-function dispatchFrame(frame: string, callbacks: ChatCallbacks): void {
+function dispatchFrame(frame: string, callbacks: ChatCallbacks): boolean {
   let event = "";
   let data = "";
 
@@ -77,14 +94,14 @@ function dispatchFrame(frame: string, callbacks: ChatCallbacks): void {
     }
   }
 
-  if (!event) return;
+  if (!event) return false;
 
   let payload: unknown;
   try {
     payload = data ? JSON.parse(data) : {};
   } catch {
-    // Malformed frame — skip rather than crash the whole stream.
-    return;
+    // Invalid JSON cannot be treated as a successful response.
+    throw new Error("The server returned an invalid response.");
   }
 
   switch (event) {
@@ -95,10 +112,11 @@ function dispatchFrame(frame: string, callbacks: ChatCallbacks): void {
       callbacks.onToken((payload as { text: string }).text);
       break;
     case "done":
-      // The loop's final onDone() call handles this; the explicit "done"
-      // frame just tells us the server is finished sending.
-      break;
+      return true;
+    case "error":
+      throw new Error((payload as { message?: string }).message || "The backend could not complete the response.");
     default:
       break;
   }
+  return false;
 }

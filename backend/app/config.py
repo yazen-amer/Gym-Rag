@@ -22,7 +22,7 @@ class Settings(BaseSettings):
         cors_origins: str = Field(default="http://localhost:5173")
 
         model_config = SettingsConfigDict(
-                env_file=".env",
+                env_file=Path(__file__).resolve().parent.parent / ".env",
                 extra="ignore",
             )
 
