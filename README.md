@@ -4,6 +4,10 @@ A chat app for asking strength-training questions against a small collection of 
 
 The backend is Python/FastAPI with Chroma for storage, Cohere for embeddings and optional reranking, and Gemini for answer generation. The frontend uses React, TypeScript, and Vite.
 
+![GymRAG initial chat interface](docs/screenshots/gymrag-chat.jpg)
+
+Initial chat interface captured October 8, 2026. The hosted chat request returned HTTP 404 during this check; this screenshot shows the interface, not a generated answer.
+
 ## From PDFs to an answer
 
 The ingestion script loads PDFs page by page and splits the text into 1,000-character chunks with 150 characters of overlap. Each chunk keeps its paper title and a one-based page number, so the interface can show where an excerpt came from. Content-based chunk IDs prevent unchanged papers from being inserted twice.
