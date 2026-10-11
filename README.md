@@ -1,12 +1,12 @@
 # GymRAG
 
-A chat app for asking strength-training questions against a small collection of research PDFs. Answers stream into the React interface with numbered references, paper titles, page numbers, and the retrieved excerpts.
+Ask strength-training questions using seven research PDFs. Answers stream into the chat with citations. You can expand each answer’s sources to see paper titles, page numbers, and excerpts.
 
-The backend is Python/FastAPI with Chroma for storage, Cohere for embeddings and optional reranking, and Gemini for answer generation. The frontend uses React, TypeScript, and Vite.
+Built with React, TypeScript, and Vite, with a Python/FastAPI backend. Chroma stores the research index, Cohere handles embeddings and optional reranking, and Gemini generates answers.
 
 ## Screenshots
 
-Captured locally on October 11, 2026, with real Cohere retrieval/reranking and Gemini `gemini-3.1-flash-lite` responses. The existing index contains 622 chunks from the repository's seven PDFs. These are actual responses, not mock answers; the expired Railway deployment remains offline.
+Local screenshots from October 11, 2026, using Cohere retrieval/reranking and Gemini `gemini-3.1-flash-lite`. The index contains 622 chunks from the seven PDFs. The Railway deployment is offline after its trial expired.
 
 **Protein intake, with numbered research citations:**
 
@@ -20,9 +20,9 @@ Captured locally on October 11, 2026, with real Cohere retrieval/reranking and G
 
 ![Research sources for the rest interval answer](docs/screenshots/gymrag-sources.jpg)
 
-## From PDFs to an answer
+## How it works
 
-The ingestion script loads PDFs page by page and splits the text into 1,000-character chunks with 150 characters of overlap. Each chunk keeps its paper title and a one-based page number, so the interface can show where an excerpt came from. Content-based chunk IDs prevent unchanged papers from being inserted twice.
+The ingestion script loads PDFs page by page and splits the text into 1,000-character chunks with 150 characters of overlap. Each chunk keeps the paper title and page number, starting at page 1. Content-based chunk IDs prevent unchanged papers from being inserted twice.
 
 For each question, the retriever gets 20 candidate chunks from Chroma. It either keeps the first five or asks Cohere to rerank the candidates and return five. Gemini receives those excerpts along with the conversation history and instructions to cite them. The API sends separate server-sent events for sources, answer tokens, completion, and errors.
 
@@ -62,7 +62,7 @@ uv run python -m eval.run_eval
 
 To compare reranking, run once with `USE_RERANK=false` and once with `USE_RERANK=true`, keeping the corpus, embedding model, `RETRIEVAL_K=20`, and `RERANK_TOP_N=5` fixed. Start a new process after changing settings.
 
-This checks paper-level retrieval on a small hand-written set. It does not measure citation correctness or answer quality. There are no saved before/after results in the repository.
+This measures whether retrieval finds an expected paper, not whether the answer or citations are correct. No before/after evaluation results are saved in the repo.
 
 ## Tests and hosting
 
@@ -80,14 +80,14 @@ For a hosted frontend, set `VITE_API_URL` to the backend origin, for example `ht
 
 ## What caused the hosted 404
 
-The deployed frontend had `VITE_API_URL=gym-rag-production.up.railway.app`, without `https://` or `/api`. The browser treated it as a path on Vercel and posted to `/gym-rag-production.up.railway.app/chat`, which returned 404. The client now normalizes backend origins and bare hostnames to the correct `/api/chat` route. Twelve routing regressions cover origins, existing API paths, localhost, relative proxies, and invalid configurations; eight failed before the correction.
+The deployed frontend had `VITE_API_URL=gym-rag-production.up.railway.app`, without `https://` or `/api`. The browser treated it as a path on Vercel and posted to `/gym-rag-production.up.railway.app/chat`, which returned 404. The client now normalizes backend origins and bare hostnames to the correct `/api/chat` route. The fix has 12 routing tests covering backend origins, API paths, localhost, relative proxies, and invalid URLs. Eight failed before the fix.
 
-There is also a hosting problem: the old Railway backend returns "Application not found" because the trial expired. Fixing the frontend URL cannot restart that service. Restore a backend, set `VITE_API_URL` to its current URL, set `CORS_ORIGINS` to the frontend origin, and rebuild/redeploy the frontend. The screenshots above use the local backend and real provider calls, not the expired deployment.
+The old Railway backend also returns "Application not found" after the trial expired. Restore a backend, set `VITE_API_URL` to its current URL, set `CORS_ORIGINS` to the frontend origin, and rebuild/redeploy the frontend. The screenshots use the local backend.
 
 The old `.envexample` selected `gemini-2.5-flash`, which returned a provider 404 for this account. The example and default now select `gemini-3.1-flash-lite`, verified with real answers. Set `CHAT_MODEL` to an available model for your account if necessary; model availability and capacity can change.
 
 ## Limits
 
-The corpus contains seven PDFs, so many questions will fall outside its coverage. The generation prompt asks for supported answers, but citations alone do not guarantee that an answer accurately represents a paper.
+The seven PDFs only cover a limited set of questions. Answers can still misread the research, even when they include citations.
 
 Reingesting an edited or removed paper does not delete its previous chunks. Rebuild the collection when replacing the corpus. Embedding, reranking, and generation also depend on external APIs.
