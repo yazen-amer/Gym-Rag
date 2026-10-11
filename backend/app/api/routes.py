@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 from fastapi import APIRouter, HTTPException
@@ -45,6 +46,8 @@ def chat(chat_request: ChatRequest):
 
 @router.post("/ingest")
 def ingest():
+    if os.getenv("DISABLE_INGEST") == "true":
+        raise HTTPException(403, "Public ingestion is disabled on this deployment.")
     if not get_settings().cohere_api_key:
         raise HTTPException(503, "Ingestion requires COHERE_API_KEY on the backend.")
     files, chunks = ingest_papers()

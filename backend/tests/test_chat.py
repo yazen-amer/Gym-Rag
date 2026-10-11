@@ -57,6 +57,11 @@ class ChatTests(unittest.TestCase):
                 response = self.client.post("/api/chat", json={"message": "Protein?"})
         self.assertEqual([e for e, _ in self.events(response)], ["sources", "token", "error"])
 
+    def test_hosted_ingestion_can_be_disabled(self):
+        with patch.dict("os.environ", {"DISABLE_INGEST": "true"}), patch("app.api.routes.ingest_papers") as ingest:
+            self.assertEqual(self.client.post("/api/ingest").status_code, 403)
+            ingest.assert_not_called()
+
     def test_invalid_message_and_role_are_rejected(self):
         for body in [{"message": "  "}, {"message": "Hi", "history": [{"role": "system", "content": "bad"}]}]:
             self.assertEqual(self.client.post("/api/chat", json=body).status_code, 422)

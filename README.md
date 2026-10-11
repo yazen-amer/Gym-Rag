@@ -1,6 +1,6 @@
 # GymRAG
 
-Ask strength-training questions using seven research PDFs. Answers stream into the chat with citations. You can expand each answer’s sources to see paper titles, page numbers, and excerpts.
+Ask strength-training questions using seven research PDFs. Answers stream into the chat with citations. You can expand each answerâ€™s sources to see paper titles, page numbers, and excerpts.
 
 Built with React, TypeScript, and Vite, with a Python/FastAPI backend. Chroma stores the research index, Cohere handles embeddings and optional reranking, and Gemini generates answers.
 
@@ -74,7 +74,7 @@ npm test
 npm run build
 ```
 
-API tests replace the provider calls and do not need paid keys. Frontend tests cover stream parsing, errors, cancellation, late callbacks, and backend URL routing. All 8 backend and 23 frontend tests pass; the production build passes.
+API tests replace the provider calls and do not need paid keys. Frontend tests cover stream parsing, errors, cancellation, late callbacks, and backend URL routing. All 10 backend and 23 frontend tests pass; the production build passes.
 
 For a hosted frontend, set `VITE_API_URL` to the backend origin, for example `https://your-backend.example.com`, before building. The client adds `/api/chat`; an existing `/api` suffix is accepted without duplication. Use `/api` only when your host reverse-proxies that path to FastAPI. Set backend `CORS_ORIGINS` to the frontend's exact origin and keep `CHROMA_DIR` on persistent storage. `/health` checks process liveness; it does not check provider credentials or index readiness.
 
@@ -91,3 +91,9 @@ The old `.envexample` selected `gemini-2.5-flash`, which returned a provider 404
 The seven PDFs only cover a limited set of questions. Answers can still misread the research, even when they include citations.
 
 Reingesting an edited or removed paper does not delete its previous chunks. Rebuild the collection when replacing the corpus. Embedding, reranking, and generation also depend on external APIs.
+
+## Free Render deployment
+
+`render.yaml` defines a free Python service that builds and serves the frontend alongside the API. Set `GEMINI_API_KEY` and `COHERE_API_KEY` as Render secrets. The frontend uses `/api` on the same origin.
+
+Startup restores the bundled 622-chunk index without embedding calls. See [the snapshot notes](backend/deployment/README.md). Public ingestion is disabled with `DISABLE_INGEST=true`; `SERVE_FRONTEND=true` enables frontend serving. Chat still uses provider quotas. Render's free service sleeps when idle, so the first request can take longer.

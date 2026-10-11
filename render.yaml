@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: gymrag
+    runtime: python
+    plan: free
+    buildCommand: pip install uv && cd backend && uv sync --locked && cd ../frontend && npm ci && VITE_API_URL=/api npm run build
+    startCommand: cd backend && uv run python -m scripts.restore_index && uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: SERVE_FRONTEND
+        value: "true"
+      - key: DISABLE_INGEST
+        value: "true"
+      - key: CHAT_MODEL
+        value: gemini-3.1-flash-lite
+      - key: USE_RERANK
+        value: "true"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: COHERE_API_KEY
+        sync: false
