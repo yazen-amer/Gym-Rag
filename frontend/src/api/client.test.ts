@@ -80,3 +80,33 @@ describe("streamChat", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
+
+
+describe("deployed chat routing", () => {
+  it.each([
+    ["gym-rag-production.up.railway.app", "https://gym-rag-production.up.railway.app/api/chat"],
+    ["https://backend.example.com", "https://backend.example.com/api/chat"],
+    ["https://backend.example.com/", "https://backend.example.com/api/chat"],
+    ["https://backend.example.com/api/", "https://backend.example.com/api/chat"],
+    ["http://localhost:8000", "http://localhost:8000/api/chat"],
+    ["/api", "/api/chat"],
+    ["/gateway/api/", "/gateway/api/chat"],
+    ["https://backend.example.com/gateway/api", "https://backend.example.com/gateway/api/chat"],
+  ])("routes %s to the backend API", async (base, expected) => {
+    vi.stubEnv("VITE_API_URL", base);
+    const fetchMock = vi.fn().mockResolvedValue(streamResponse([frame("done", {})]));
+    vi.stubGlobal("fetch", fetchMock);
+    const cb = callbacks();
+    await streamChat("Question", [], new AbortController().signal, cb);
+    expect(fetchMock.mock.calls[0][0]).toBe(expected);
+    expect(cb.onError).not.toHaveBeenCalled();
+  });
+  it.each(["ftp://backend.example.com", "https://backend.example.com?token=x", "https://user:password@backend.example.com", "not a host"])("rejects invalid API configuration: %s", async (base) => {
+    vi.stubEnv("VITE_API_URL", base);
+    const fetchMock = vi.fn(); vi.stubGlobal("fetch", fetchMock);
+    const cb = callbacks();
+    await streamChat("Question", [], new AbortController().signal, cb);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(cb.onError.mock.calls[0][0].message).toContain("VITE_API_URL");
+  });
+});

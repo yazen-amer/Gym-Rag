@@ -7,7 +7,7 @@ class Settings(BaseSettings):
         backend_dir: Path = Path(__file__).resolve().parent.parent
 
         gemini_api_key: str = Field(default="")
-        chat_model: str = Field(default="gemini-3.5-flash")
+        chat_model: str = Field(default="gemini-3.1-flash-lite")
         cohere_api_key: str = Field(default="")
         embed_model: str = Field(default="embed-english-v3.0")
         rerank_model: str = Field(default="rerank-english-v3.0")

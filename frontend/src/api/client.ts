@@ -7,6 +7,28 @@ interface ChatCallbacks {
   onError: (err: Error) => void;
 }
 
+/** Accept a backend origin or an API base; never fetch a bare hostname as a relative path. */
+function chatUrl(configured: string | undefined): string {
+  let base = configured?.trim() || "/api";
+  const relative = base.startsWith("/") && !base.startsWith("//");
+  try {
+    if (/[\s?#]/.test(base)) throw new Error();
+    if (!relative) {
+      if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(base)) {
+        base = `https://${base.replace(/^\/\//, "")}`;
+      }
+      const url = new URL(base);
+      if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) throw new Error();
+      base = url.href;
+    }
+    base = base.replace(/\/+$/, "");
+    if (!base.endsWith("/api")) base += "/api";
+    return `${base}/chat`;
+  } catch {
+    throw new Error("Invalid VITE_API_URL. Use a backend origin such as https://your-backend.example.com or /api for a reverse proxy.");
+  }
+}
+
 /**
  * POSTs to /api/chat and parses the Server-Sent Events response by hand.
  *
@@ -22,10 +44,9 @@ export async function streamChat(
 ): Promise<void> {
   try {
     if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
-      throw new Error("Set VITE_API_URL to the deployed backend URL (including /api), then rebuild the frontend.");
+      throw new Error("Set VITE_API_URL to the deployed backend URL (with https://), then rebuild the frontend.");
     }
-    const apiBase = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
-    const res = await fetch(`${apiBase}/chat`, {
+    const res = await fetch(chatUrl(import.meta.env.VITE_API_URL), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message, history }),
