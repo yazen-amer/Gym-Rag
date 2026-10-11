@@ -1,10 +1,16 @@
 # GymRAG
 
-Ask strength-training questions using seven research PDFs. Answers stream into the chat with citations. You can expand each answerâ€™s sources to see paper titles, page numbers, and excerpts.
+[Live app](https://gymrag.onrender.com/) Â· Free Render hosting; the first request after inactivity can take about a minute.
+
+Ask strength-training questions using seven research PDFs. Answers stream into the chat with citations. You can expand each answerÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s sources to see paper titles, page numbers, and excerpts.
 
 Built with React, TypeScript, and Vite, with a Python/FastAPI backend. Chroma stores the research index, Cohere handles embeddings and optional reranking, and Gemini generates answers.
 
 ## Screenshots
+
+**Answer from the public Render deployment, October 11, 2026:**
+
+![Live GymRAG answer](docs/screenshots/gymrag-live-answer.jpg)
 
 Local screenshots from October 11, 2026, using Cohere retrieval/reranking and Gemini `gemini-3.1-flash-lite`. The index contains 622 chunks from the seven PDFs. The Railway deployment is offline after its trial expired.
 
@@ -82,7 +88,7 @@ For a hosted frontend, set `VITE_API_URL` to the backend origin, for example `ht
 
 The deployed frontend had `VITE_API_URL=gym-rag-production.up.railway.app`, without `https://` or `/api`. The browser treated it as a path on Vercel and posted to `/gym-rag-production.up.railway.app/chat`, which returned 404. The client now normalizes backend origins and bare hostnames to the correct `/api/chat` route. The fix has 12 routing tests covering backend origins, API paths, localhost, relative proxies, and invalid URLs. Eight failed before the fix.
 
-The old Railway backend also returns "Application not found" after the trial expired. Restore a backend, set `VITE_API_URL` to its current URL, set `CORS_ORIGINS` to the frontend origin, and rebuild/redeploy the frontend. The screenshots use the local backend.
+The old Railway backend also returns "Application not found" after the trial expired. The app now runs on Render, with the frontend and API on the same origin. The other screenshots were captured locally before deployment. For a separate frontend, configure the backend URL and CORS before rebuilding.
 
 The old `.envexample` selected `gemini-2.5-flash`, which returned a provider 404 for this account. The example and default now select `gemini-3.1-flash-lite`, verified with real answers. Set `CHAT_MODEL` to an available model for your account if necessary; model availability and capacity can change.
 
@@ -96,4 +102,4 @@ Reingesting an edited or removed paper does not delete its previous chunks. Rebu
 
 `render.yaml` defines a free Python service that builds and serves the frontend alongside the API. Set `GEMINI_API_KEY` and `COHERE_API_KEY` as Render secrets. The frontend uses `/api` on the same origin.
 
-Startup restores the bundled 622-chunk index without embedding calls. See [the snapshot notes](backend/deployment/README.md). Public ingestion is disabled with `DISABLE_INGEST=true`; `SERVE_FRONTEND=true` enables frontend serving. Chat still uses provider quotas. Render's free service sleeps when idle, so the first request can take longer.
+Startup restores the bundled 622-chunk index without embedding calls. See [the snapshot notes](backend/deployment/README.md). Public ingestion is disabled with `DISABLE_INGEST=true`; `SERVE_FRONTEND=true` enables frontend serving. Chat still uses provider quotas. Live checks confirmed the page, API health, retrieval, and a completed cited answer; the first question received a temporary Gemini 503 before a second question succeeded. Render's free service sleeps when idle, so the first request can take longer.
